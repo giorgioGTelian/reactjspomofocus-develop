@@ -1,9 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import { useCallback, useEffect } from "react";
-import clsx from "clsx";
 import Icon from "./Icon";
 import Progress from "./Progress";
-import classes from "./Timer.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { incrementRound, setMode } from "../redux/timerSlice";
 import {
@@ -19,6 +17,7 @@ import {
 import { updateFavicon, updateTitle, formatTime } from "../helpers";
 import useCountdown from "../useCountdown";
 import { player } from "../util";
+import { Box, Button, Typography } from "@mui/material";
 
 const buttonSound = player({
   asset: "sounds/button-press.wav",
@@ -33,35 +32,62 @@ const alarmAudio = player({});
 
 const SecondaryButton = ({ children, active, onClick }) => {
   return (
-    <button
+    <Button
       onClick={onClick}
-      className={clsx(
-        classes.secondaryButton,
-        active && classes.secondaryActive
-      )}
+      sx={{
+        fontSize: "1rem",
+        padding: "0.125rem 0.75rem",
+        height: "1.75rem",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        color: "white",
+        transition: "transform 0.1s ease-in-out",
+        "&:active, &.active": {
+          backgroundColor: "rgba(0, 0, 0, 0.15)",
+          transform: "translateY(0.125rem)",
+        },
+      }}
     >
       {children}
-    </button>
+    </Button>
   );
 };
 
 const PrimaryButton = ({ active, onClick, color }) => (
-  <button
+  <Button
     onClick={onClick}
-    className={clsx(
-      classes.primaryButton,
-      active && classes.primaryActive,
-      color
-    )}
+    sx={{
+      padding: "0 0.75rem",
+      boxShadow: "rgb(235, 235, 235) 0 0.375rem 0",
+      fontSize: "1.375rem",
+      height: "3.4375rem",
+      fontWeight: 600,
+      minWidth: "12.5rem",
+      backgroundColor: "white",
+      textTransform: "uppercase",
+      transition: "color 0.5s ease-in-out 0s",
+      "&.active": {
+        transform: "translateY(0.375rem)",
+        boxShadow: "none",
+      },
+      "&.pomodoro": {
+        color: "var(--primary-color)",
+      },
+      "&.short_break": {
+        color: "var(--secondary-color)",
+      },
+      "&.long_break": {
+        color: "var(--tertiary-color)",
+      },
+    }}
   >
     {active ? STOP : START}
-  </button>
+  </Button>
 );
 
 const NextButton = ({ onClick, className }) => (
-  <button onClick={onClick} className={clsx(classes.nextButton, className)}>
+  <Button onClick={onClick} sx={{color: "white"}} className={className}>
     <Icon name="skip_next" size={48} />
-  </button>
+  </Button>
 );
 
 export default function Timer() {
@@ -190,11 +216,26 @@ export default function Timer() {
   }, [start, stop, ticking]);
 
   return (
-    <div>
+    <Box>
       <Progress percent={progress} />
-      <div className={classes.container}>
-        <div className={classes.content}>
-          <ul>
+      <Box
+        sx={{
+          maxWidth: "30rem",
+          margin: "auto",
+          textAlign: "center",
+          userSelect: "none",
+        }}
+      >
+        <Box
+          sx={{
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            padding: "1.25rem 0 1.875rem",
+            borderRadius: "0.375rem",
+            marginBottom: "1.25rem",
+            width: "100%",
+          }}
+        >
+          <Box component="ul" sx={{ padding: 0, margin: 0, listStyle: "none" }}>
             {Object.values(modes).map(({ id, label }) => (
               <SecondaryButton
                 key={id}
@@ -205,28 +246,67 @@ export default function Timer() {
                 {label}
               </SecondaryButton>
             ))}
-          </ul>
-          <div className={classes.time}>{formatTime(timeLeft)}</div>
-          <div className={classes.actionButtons}>
-            <div className={classes.left} />
+          </Box>
+          <Typography
+            sx={{
+              fontSize: "6.25rem",
+              lineHeight: "8.6875rem",
+              fontWeight: 600,
+              marginTop: "1.25rem",
+              userSelect: "none",
+              "@media screen and (min-width: 992px)": {
+                fontSize: "7.5rem",
+              },
+            }}
+          >
+            {formatTime(timeLeft)}
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexGrow: 1,
+              alignItems: "center",
+              margin: "1.25rem 0 0",
+            }}
+          >
+            <Box sx={{ display: "flex", flexGrow: 1, width: "100%" }} />
             <PrimaryButton
               active={ticking}
               onClick={toggleTimer}
-              color={classes[mode]}
             />
-            <div className={classes.right}>
+                        <Box
+              sx={{
+                display: "flex",
+                flexGrow: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
               <NextButton
-                className={ticking && classes.showNext}
+                className={ticking }
                 onClick={confirmNext}
               />
-            </div>
-          </div>
-        </div>
-        <div className={classes.counter}>#{round}</div>
-        <footer className={classes.footer}>
+            </Box>
+          </Box>
+        </Box>
+        <Typography
+          sx={{
+            opacity: 0.6,
+            marginBottom: "0.25rem",
+          }}
+        >
+          #{round}
+        </Typography>
+        <footer
+          sx={{
+            fontSize: "1.125rem",
+            fontWeight: 400,
+          }}
+        >
           {mode === POMODORO ? TIME_TO_FOCUS : TIME_FOR_A_BREAK}
         </footer>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
